@@ -1,5 +1,5 @@
 {
-    "name": "new-bit-pay-back-end-zefw",
+    "name": "Ultima-FinancesBackend.",
     "builds": [
       {
         "src": "server.js",
