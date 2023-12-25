@@ -49,6 +49,9 @@ ltcWalletAddress: {
 xrpWalletAddress: {
     type: String,
 },
+trxWalletAddress: {
+    type: String,
+},
   
   referralCode: {
     type: String,
