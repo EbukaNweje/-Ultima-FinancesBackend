@@ -18,16 +18,16 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
 
-  phoneNumber: {
+  userName: {
     type: String,
     required: true,
   },
 
 
-  country: {
-    type: String,
-    required: true,
-  },
+  // country: {
+  //   type: String,
+  //   required: true,
+  // },
   
   referralCode: {
     type: String,
