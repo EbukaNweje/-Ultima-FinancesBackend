@@ -1,12 +1,8 @@
 const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
+  
   fullName: {
-    type: String,
-    required: true,
-  },
-
-  userName: {
     type: String,
     required: true,
   },
@@ -22,36 +18,16 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
 
-  btcWalletAddress: {
+  phoneNumber: {
     type: String,
+    required: true,
   },
 
- ethWalletAddress: {
+
+  country: {
     type: String,
+    required: true,
   },
-
- usdtWalletAddress: {
-    type: String,
-  },
-
-shibaWalletAddress: {
-    type: String,
-  },
-
-bchWalletAddress: {
-    type: String,
-  },
-
-ltcWalletAddress: {
-    type: String,
-},
-
-xrpWalletAddress: {
-    type: String,
-},
-trxWalletAddress: {
-    type: String,
-},
   
   referralCode: {
     type: String,
@@ -63,45 +39,27 @@ trxWalletAddress: {
   },
 
   accountBalance: {
-    type: String,
+    type: Number,
     default: 0.00
   },
 
-  activeDeposit: {
-    type: String,
+  totalInvestment: {
+    type: Number,
     default: 0.00
   },
 
-  totalEarned: {
-    type: String,
-    default: 0.00
-  },
-  lastDeposit: {
-    type: String,
-    default: 0.00
-  },
-  pendingWithdrawal: {
-    type: String,
-    default: 0.00
-  },
-
-  lastWithdrawal: {
-    type: String,
-    default: 0.00
-  },
-
-  totalWithdrawal: {
-    type: String,
+  totalProfit: {
+    type: Number,
     default: 0.00
   },
 
   bonus: {
-    type: String,
+    type: Number,
     default: 0.00
   },
 
   tradingAccounts: {
-    type: String,
+    type: Number,
     default: 0.00
   },
 
@@ -110,14 +68,13 @@ trxWalletAddress: {
     default: 0.00
   },
 
-  
 totalDeposit: {
-    type: String,
+    type: Number,
     default: 0.00
   },
 
 totalWithdrawal: {
-    type: String,
+    type: Number,
     default: 0.00
   },
 
@@ -132,14 +89,39 @@ totalWithdrawal: {
 
   verify: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 
   isAdmin: {
-    // Role of user it will be (normal or admin )
     type: Boolean,
     default: false,
   },
+  admin:{
+     type: mongoose.SchemaTypes.ObjectId,
+     ref: "admin"
+  },
+  investmentPlan:[{
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: "userplan",
+  }],
+  Transactions: {
+    deposits: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'deposit'
+    }],
+    withdrawals: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'withdraw'
+    }],
+    investments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Invest'
+    }],
+    interests: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Interest'
+    }],
+},
 
 }, {timestamps: true});
 

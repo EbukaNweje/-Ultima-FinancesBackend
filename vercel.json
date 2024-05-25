@@ -1,5 +1,5 @@
 {
-    "name": "Ultima-FinancesBackend.",
+    "name": "the-bitpay-capital-back-end",
     "builds": [
       {
         "src": "server.js",

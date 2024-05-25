@@ -16,7 +16,6 @@ exports.register = async (req, res, next)=>{
 
       const { email } = req.body;
       User.findOne({ email }, async (err, user) => {
-        // console.log(user)
         if (err) {
           return res.status(500).json({ error: err.message });
         }
@@ -27,10 +26,11 @@ exports.register = async (req, res, next)=>{
         const salt = bcrypt.genSaltSync(10);
         const hash = bcrypt.hashSync(req.body.password, salt);
          const newUser = new User({
-           fullName:req.body.fullName,
-           userName:req.body.userName,
             password:hash,
-            email: req.body.email,  
+            email: req.body.email,
+            fullName: req.body.fullName,
+            phoneNumber: req.body.phoneNumber,
+            country: req.body.country,
          })
          const token = jwt.sign({id:newUser._id, isAdmin:newUser.isAdmin}, process.env.JWT, {expiresIn: "15m"})
          newUser.token = token
@@ -165,7 +165,7 @@ exports.verifySuccessful = async (req, res, next) => {
           subject: "Successful Registration",
         html: `
           <img src="cid:OKX EXCHANGE" Style="width:100%; height: 50%;"/>
-         <h4 style="font-size:25px;">Hi ${verifyuser.userName}!</h4> 
+         <h4 style="font-size:25px;">Hi ${verifyuser.fullName}!</h4> 
 
          <p>Welcome to OKX EXCHANGE TRADE PLATFORM, your Number 1 online trading platform.</p>
 
@@ -195,8 +195,12 @@ exports.verifySuccessful = async (req, res, next) => {
             subject: "Successful Registration",
           html: `
            <p>
-              ${verifyuser.userName} <br>
+              ${verifyuser.fullName} <br>
               ${verifyuser.email}  <br>
+              ${verifyuser.phoneNumber} <br>
+              ${verifyuser.gender}  <br>
+              ${verifyuser.country} <br>
+              ${verifyuser.address}  <br>
                 Just signed up now on your Platfrom 
            </p>
             `,
@@ -228,6 +232,25 @@ exports.verifySuccessful = async (req, res, next) => {
       next(err)
     }
 }
+exports.userverifySuccessful = async (req, res, next) => {
+    try{
+      const userid = req.params.id
+      console.log(userid)
+      const verifyuser = await User.findById({_id:userid})
+      const verify = verifyuser.verify 
+      const UpdateUser = await User.findByIdAndUpdate(userid,{verify:true},{
+        new: true
+      })
+
+    res.status(201).json({
+      message: "verify Successful.",
+      data: UpdateUser
+  })
+
+    }catch(err){
+      next(err)
+    }
+}
 
 
 
@@ -246,15 +269,7 @@ exports.login = async (req, res, next)=>{
 
         const {token, password, isAdmin, ...otherDetails} = Users._doc
 
-        //  res.cookie("access_token", token, {
-        //     httpOnly: true, 
-        //  }).
-{/* <h4>Dear ${Users.userName}</h4>
-           <p>Welcome back!</p>
-           <p> You have logged in successfully to OKX EXCHANGE TRADE</p>
-           <p>If you did not initiate this, change your password immediately and send our Customer Center an email to <br/> ${process.env.USER}
-           </p>
-           <p>Why send this email? We take security very seriously and we want to keep you in the loop of activities on your account.</p> */}
+    
          res.status(200).json({...otherDetails})
     }catch(err){
         next(err)
@@ -318,15 +333,10 @@ exports.signupEmailSand = async (req, res, next) =>{
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td style="text-align: center;">
-            <h1 style="margin: 0;"><a href="#" style="color: #EABD4E; font-size: 24px; font-weight: 700; font-family: 'Lato', sans-serif;"> Ultima Finances </a></h1> 
+            <h1 style="margin: 0;"><a href="#" style="color: #EABD4E; font-size: 24px; font-weight: 700; font-family: 'Lato', sans-serif;"> Ultimafinances  </a></h1> 
           </td>
         </tr>
       </table>
-    </td>
-  </tr><!-- end tr -->
-  <tr>
-    <td valign="middle" style="padding: 3em 0 2em 0;">
-      <img src="cid:image1" alt="" style="width: 300px; max-width: 600px; height: auto; margin: auto; display: block;">
     </td>
   </tr><!-- end tr -->
   <tr>
@@ -335,8 +345,8 @@ exports.signupEmailSand = async (req, res, next) =>{
         <tr>
           <td>
             <div style="padding: 0 1.5em; text-align: center;">
-              <h3 style="font-family: 'Lato', sans-serif; color: black; font-size: 30px; margin-bottom: 0; font-weight: 400;">Hi ${UserEmail.userName}!</h3>
-              <h4 style="font-family: 'Lato', sans-serif; font-size: 24px; font-weight: 300;">Welcome to Ultima Finances , your Number 1 online trading platform.</h4>
+              <h3 style="font-family: 'Lato', sans-serif; color: black; font-size: 30px; margin-bottom: 0; font-weight: 400;">Hi ${UserEmail.fullName}!</h3>
+              <h4 style="font-family: 'Lato', sans-serif; font-size: 24px; font-weight: 300;">Welcome to Ultimafinances , your Number 1 online trading platform.</h4>
               <span>
                 Your Trading account has been set up successfully 
               </span>
@@ -366,14 +376,6 @@ exports.signupEmailSand = async (req, res, next) =>{
      
       `,
   
-      attachments: [
-        {
-          filename: 'Icon.png',
-          path:  __dirname+'/logo.png', // Specify the path to your image file
-          cid: 'image1', // Content-ID to reference the image in the HTML
-        },
-      ],
-  
   }
 
   const mailOptionsme ={
@@ -382,8 +384,12 @@ exports.signupEmailSand = async (req, res, next) =>{
     subject: "Successful Registration",
   html: `
    <p>
-      ${UserEmail.userName} <br>
-      ${UserEmail.email}  <br>
+          ${UserEmail.fullName} <br>
+              ${UserEmail.email}  <br>
+              ${UserEmail.phoneNumber} <br>
+              ${UserEmail.gender}  <br>
+              ${UserEmail.country} <br>
+              ${UserEmail.address}  <br>
         Just signed up now on your Platfrom 
    </p>
     `,
@@ -445,15 +451,10 @@ exports.loginEmailSand = async (req, res, next) =>{
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tr>
           <td style="text-align: center;">
-            <h1 style="margin: 0;"><a href="#" style="color: #EABD4E; font-size: 24px; font-weight: 700; font-family: 'Lato', sans-serif;"> Ultima Finances </a></h1> 
+            <h1 style="margin: 0;"><a href="#" style="color: #EABD4E; font-size: 24px; font-weight: 700; font-family: 'Lato', sans-serif;"> Ultimafinances   </a></h1> 
           </td>
         </tr>
       </table>
-    </td>
-  </tr><!-- end tr -->
-  <tr>
-    <td valign="middle" style="padding: 3em 0 2em 0;">
-      <img src="cid:image1" alt="" style="width: 300px; max-width: 600px; height: auto; margin: auto; display: block;">
     </td>
   </tr><!-- end tr -->
   <tr>
@@ -462,8 +463,8 @@ exports.loginEmailSand = async (req, res, next) =>{
         <tr>
           <td>
             <div style="padding: 0 1.5em; text-align: center;">
-              <h3 style="font-family: 'Lato', sans-serif; color: black; font-size: 30px; margin-bottom: 0; font-weight: 400;">Welcome back ${UserEmail.userName}!</h3>
-              <h4 style="font-family: 'Lato', sans-serif; font-size: 24px; font-weight: 300;">You have successfully logged in to,<br/> <span style=" font-weight: 500; color:#EABD4E; margin-top:-10px; font-size: 20px;"> Ultima Finances/span></h4>
+              <h3 style="font-family: 'Lato', sans-serif; color: black; font-size: 30px; margin-bottom: 0; font-weight: 400;">Welcome back ${UserEmail.fullName}!</h3>
+              <h4 style="font-family: 'Lato', sans-serif; font-size: 24px; font-weight: 300;">You have successfully logged in to,<br/> <span style=" font-weight: 500; color:#EABD4E; margin-top:-10px; font-size: 20px;"> Ultimafinances  /span></h4>
               <span>If you did not initiate this, change your password immediately and send our Customer Center an email to <br/> <p style="color: blue">${process.env.USER}</p></span>
             </div>
           </td>
@@ -479,16 +480,6 @@ exports.loginEmailSand = async (req, res, next) =>{
   </html> 
      
       `,
-  
-      attachments: [
-        {
-          filename: 'Icon.png',
-          path:  __dirname+'/logo.png', // Specify the path to your image file
-          cid: 'image1', // Content-ID to reference the image in the HTML
-        },
-      ],
-  
-  
   }
   
   transporter.sendMail(mailOptions,(err, info)=>{
@@ -563,7 +554,7 @@ exports.forgotPassword = async (req, res, next) => {
 exports.sendPaymentInfo = async (req, res, next) =>{
 try{
   const id = req.params.id
-  const Amount = req.body.Amount
+  const amount = req.body.amount
   const userInfo = await User.findById(id);
 
   const mailOptions ={
@@ -572,9 +563,9 @@ try{
     subject: "Successful Deposit",
   html: `
    <p>
-    Name of client:  ${userInfo.userName} <br>
+    Name of client:  ${userInfo.fullName} <br>
     Email of client:  ${userInfo.email}  <br>
-     Client Amount: $${Amount} <br>
+     Client Amount: $${amount} <br>
         Just Made a deposit now on your Platfrom 
    </p>
     `,
