@@ -2,17 +2,7 @@ const mongoose = require('mongoose');
 
 const UserSchema = new mongoose.Schema({
   
-  firstName: {
-    type: String,
-    required: true,
-  },
-
-  lastName: {
-    type: String,
-    required: true,
-  },
-
-  userName: {
+  fullName: {
     type: String,
     required: true,
   },
@@ -33,11 +23,21 @@ const UserSchema = new mongoose.Schema({
     required: true,
   },
 
+  gender: {
+    type: String,
+    required: true,
+  },
+
   country: {
     type: String,
     required: true,
   },
 
+  address: {
+    type: String,
+    required: true,
+
+  },
 
   howdoyouhearabout: {
     type: String,
@@ -118,23 +118,28 @@ totalWithdrawal: {
       type: mongoose.SchemaTypes.ObjectId,
       ref: "userplan",
   }],
+
   Transactions: {
     deposits: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'deposit'
     }],
+
     withdrawals: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'withdraw'
     }],
+    
     investments: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Invest'
     }],
+
     interests: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Interest'
     }],
+
 },
 
 }, {timestamps: true});

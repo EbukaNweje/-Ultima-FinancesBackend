@@ -1,11 +1,13 @@
 const Admin = require("../models/Admin");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const createError = require("../utilities/error");
 const jwt = require("jsonwebtoken")
 const {validationResult } = require('express-validator');
 const depositModel = require('../models/depositModel');
 const userModel = require('../models/User');
 const withdrawModel = require("../models/withdrawModel");
+const InterestModel = require("../models/InterestModel");
+const historyModel = require("../models/historyModel");
 
 exports.register = async (req, res, next)=>{
     try{
@@ -136,8 +138,8 @@ exports.confirmWithdraw = async (req, res) => {
         }
 
         // Check if the withdraw is already confirmed
-        if (withdraw.status === 'confirmed') {
-            return res.status(400).json({ message: 'withdrawal is already confirmed' });
+        if (withdraw.status === 'Approved') {
+            return res.status(400).json({ message: 'withdrawal is already Approved' });
         }
 
         // Find the user associated with the withdraw
@@ -146,21 +148,81 @@ exports.confirmWithdraw = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Update the withdraw status to 'confirmed'
-        withdraw.status = 'confirmed';
+        // Update the withdraw status to 'Approved'
+        withdraw.status = 'Approved';
         await withdraw.save();
 
         // // Update the user's account balance
-        user.accountBalance += parseFloat(withdraw.amount);
+        user.accountBalance -= parseFloat(withdraw.amount);
         await user.save();
         user.totalWithdrawal += parseFloat(withdraw.amount);
         await user.save();
 
         // Return success response
-        res.status(200).json({ message: 'withdrawal confirmed successfully' });
+        res.status(200).json({ message: 'withdrawal Approved successfully' });
     } catch (err) {
         // Handle errors
         console.error(err);
         res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+
+
+exports.addProfit = async (req, res) => {
+    try {
+        // Extract user ID and profit details from the request
+        const { id } = req.params;
+        const amount = req.body.amount;
+        console.log(amount);
+
+        // Validate the profit amount
+        const profitAmount = Number(amount);
+        console.log(profitAmount);
+        if (profitAmount <= 0 || isNaN(profitAmount)) {
+            return res.status(400).json({
+                message: 'Profit amount must be greater than 0',
+            });
+        }
+
+        // Find the user
+        const user = await userModel.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found',
+            });
+        }
+
+        // Add profit details to the Interest collection
+        const profit = new InterestModel({
+            user: user._id,
+            amount: profitAmount,
+        });
+        await profit.save();
+
+        // Update the user's account balance and total profit
+        user.accountBalance += profitAmount;
+        user.totalProfit = (user.totalProfit || 0) + profitAmount;
+        await user.save();
+
+        // Create a transaction history entry
+        const history = new historyModel({
+            id: user._id,
+            transactionType: 'Profit',
+            amount: profitAmount,
+        });
+        await history.save();
+
+        // Send a success response
+        return res.status(200).json({
+            message: `Profit of ${profitAmount} added successfully to user ${user.userName}`,
+        });
+
+    } catch (err) {
+        // Handle errors
+        console.error(err);
+        return res.status(500).json({
+            message: err.message,
+        });
     }
 };

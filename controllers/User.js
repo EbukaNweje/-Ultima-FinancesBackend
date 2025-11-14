@@ -324,8 +324,8 @@ exports.updateTotalEarned = async (req,res, next) => {
 
 exports.getUserDeposits = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findById(id).populate('Transactions.deposits');
+        const { userId } = req.params;
+        const user = await User.findById(userId).populate('Transactions.deposits');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -342,8 +342,8 @@ exports.getUserDeposits = async (req, res) => {
 
 exports.getUserInvestments = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findById(id).populate('Transactions.investments');
+        const { userId } = req.params;
+        const user = await User.findById(userId).populate('Transactions.investments');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -358,10 +358,31 @@ exports.getUserInvestments = async (req, res) => {
     }
 };
 
-exports.getUserInterests = async (req, res) => {
+
+
+
+
+
+exports.getAllUserInvestments = async (req, res) => {
     try {
         const { id } = req.params;
-        const user = await User.findById(id).populate('Transactions.interests');
+
+        // Fetch all investments associated with the user and populate the plan information
+        const investments = await investModel.find({ user: id }).populate('plan');
+
+        res.status(200).json({ message: 'Investments retrieved successfully', data: investments });
+    } catch (error) {
+        console.error('Error fetching investments:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+
+exports.getUserInterests = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const user = await User.findById(userId).populate('Transactions.interests');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -378,8 +399,8 @@ exports.getUserInterests = async (req, res) => {
 
 exports.getUserWithdrawals = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findById(id).populate('Transactions.withdrawals');
+        const { userId } = req.params;
+        const user = await User.findById(userId).populate('Transactions.withdrawals');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }

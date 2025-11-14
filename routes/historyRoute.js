@@ -7,6 +7,7 @@ const { getAllHistory, depositHistory,  investHistory } = require("../controller
 router.get("/getallhistory", getAllHistory)
 router.get("/deposithistory", depositHistory)
 router.get("/investmenthistory", investHistory)
+router.get("/investmenthistory", investHistory)
 
 
 module.exports = router
